@@ -122,6 +122,10 @@ function Todos() {
           </ul>
           <button
             type="button"
+            onClick={() => {
+              setTodos(todos.filter((todo) => !todo.completed));
+              setItems(todos.filter((todo) => !todo.completed).length);
+            }}
             className="cursor-pointer justify-self-end hover:underline"
           >
             Clear completed
