@@ -77,10 +77,11 @@ function Todos() {
                 <span
                   className="rotate-90"
                   onClick={() => {
+                    const allCompleted = todos.every((todo) => todo.completed);
                     setTodos(
                       todos.map((todo) => ({
                         ...todo,
-                        completed: !todo.completed,
+                        completed: !allCompleted,
                       })),
                     );
                   }}
