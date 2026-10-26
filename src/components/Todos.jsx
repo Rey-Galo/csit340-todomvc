@@ -56,7 +56,10 @@ function Todos() {
             htmlFor="toggle-all"
             className="absolute -top-16.5 left-0 flex h-16.25 w-15 cursor-pointer items-center justify-center text-[22px] text-[#949494] peer-checked:text-[#484848]"
           >
-            <span className="rotate-90">❯</span>
+            <span className="rotate-90" onClick={() => {
+              setTodos(todos.map((todo) => ({ ...todo, completed: !todo.completed })));
+              setItems(todos.filter((todo) => !todo.completed).length);
+            }}>❯</span>
           </label>
           <ul>
             {todos.map((todo) => (
