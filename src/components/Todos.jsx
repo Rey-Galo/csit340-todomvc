@@ -2,21 +2,33 @@ import { useState } from "react";
 
 function Todos() {
   const [text, setText] = useState("");
-  const [todos, setTodos] = useState([])
-  const [items, setItems] = useState(0)
+  const [todos, setTodos] = useState([]);
+  const [filter, setFilter] = useState("all");
+
+  const visibleTodos = todos.filter((todo) =>
+    filter === "active"
+      ? !todo.completed
+      : filter === "completed"
+        ? todo.completed
+        : true,
+  );
+
+  const itemsLeft = todos.filter((todo) => !todo.completed).length;
 
   function handleSubmit(e) {
     e.preventDefault();
     const trimmed = text.trim();
+
     if (trimmed === "") {
       return;
     }
+
     const newTodo = {
       id: crypto.randomUUID(),
       text: trimmed,
       completed: false,
     };
-    setItems(items + 1);
+
     setTodos([...todos, newTodo]);
     setText("");
   }
@@ -30,15 +42,20 @@ function Todos() {
   }
 
   function handleDelete(id) {
-    setItems(items - 1);
     setTodos(todos.filter((todo) => todo.id !== id));
   }
+
+  const selectedFilterClass =
+    "cursor-pointer rounded-[3px] border border-[#b83f45]/20 px-[7px] py-[3px]";
+  const unselectedFilterClass =
+    "cursor-pointer rounded-[3px] border border-transparent px-[7px] py-[3px] hover:border-[#b83f45]/10";
 
   return (
     <section className="mx-auto max-w-137.5">
       <h1 className="text-center text-[80px] font-extralight text-[#b83f45]">
         todos
       </h1>
+
       <div className="relative bg-white shadow-[0_2px_4px_0_rgba(0,0,0,0.2),0_25px_50px_0_rgba(0,0,0,0.1)]">
         <form onSubmit={handleSubmit}>
           <input
@@ -48,93 +65,125 @@ function Todos() {
             placeholder="What needs to be done?"
           />
         </form>
-       {todos.length > 0 && (
+
+        {todos.length > 0 && (
           <>
-        <main className="relative border-t border-[#e6e6e6]">
-          <input id="toggle-all" type="checkbox" className="peer sr-only" />
-          <label
-            htmlFor="toggle-all"
-            className="absolute -top-16.5 left-0 flex h-16.25 w-15 cursor-pointer items-center justify-center text-[22px] text-[#949494] peer-checked:text-[#484848]"
-          >
-            <span className="rotate-90" onClick={() => {
-              setTodos(todos.map((todo) => ({ ...todo, completed: !todo.completed })));
-              setItems(todos.filter((todo) => !todo.completed).length);
-            }}>❯</span>
-          </label>
-          <ul>
-            {todos.map((todo) => (
-              <li
-                key={todo.id}
-                className="group relative flex items-center border-b border-[#ededed] text-2xl"
+            <main className="relative border-t border-[#e6e6e6]">
+              <input id="toggle-all" type="checkbox" className="peer sr-only" />
+              <label
+                htmlFor="toggle-all"
+                className="absolute -top-16.5 left-0 flex h-16.25 w-15 cursor-pointer items-center justify-center text-[22px] text-[#949494] peer-checked:text-[#484848]"
               >
-                <input
-                  type="checkbox"
-                  checked={todo.completed}
-                  onChange={() => handleToggle(todo.id)}
-                  className="ml-3.75 size-7.5 shrink-0 cursor-pointer accent-[#59a193]"
-                />
                 <span
-                  className={
-                    todo.completed
-                      ? "flex-1 py-[15px] pr-[60px] pl-[15px] break-all text-[#949494] line-through"
-                      : "flex-1 py-[15px] pr-[60px] pl-[15px] break-all"
-                  }
+                  className="rotate-90"
+                  onClick={() => {
+                    setTodos(
+                      todos.map((todo) => ({
+                        ...todo,
+                        completed: !todo.completed,
+                      })),
+                    );
+                  }}
                 >
-                  {todo.text}
+                  ❯
                 </span>
-                <button
-                  type="button"
-                  onClick={() => handleDelete(todo.id)}
-                  className="absolute right-2.5 hidden size-10 cursor-pointer text-[30px] text-[#949494] group-hover:block hover:text-[#c18585]"
-                >x</button>
-              </li>
-            ))}
-          </ul>
-        </main>
-        <footer className="grid h-10 grid-cols-3 items-center border-t border-[#e6e6e6] px-3.75 text-[15px]">
-          <span>
-            <strong className="font-light">{items}</strong> item left
-          </span>
-          <ul className="flex justify-center gap-1">
-            {" "}
-            <li>
-              {" "}
+              </label>
+
+              <ul>
+                {visibleTodos.map((todo) => (
+                  <li
+                    key={todo.id}
+                    className="group relative flex items-center border-b border-[#ededed] text-2xl"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={todo.completed}
+                      onChange={() => handleToggle(todo.id)}
+                      className="ml-3.75 size-7.5 shrink-0 cursor-pointer accent-[#59a193]"
+                    />
+
+                    <span
+                      className={
+                        todo.completed
+                          ? "flex-1 py-[15px] pr-[60px] pl-[15px] break-all text-[#949494] line-through"
+                          : "flex-1 py-[15px] pr-[60px] pl-[15px] break-all"
+                      }
+                    >
+                      {todo.text}
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(todo.id)}
+                      className="absolute right-2.5 hidden size-10 cursor-pointer text-[30px] text-[#949494] group-hover:block hover:text-[#c18585]"
+                    >
+                      x
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </main>
+
+            <footer className="grid h-10 grid-cols-3 items-center border-t border-[#e6e6e6] px-3.75 text-[15px]">
+              <span>
+                <strong className="font-light">{itemsLeft}</strong> item left
+              </span>
+
+              <ul className="flex justify-center gap-1">
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => setFilter("all")}
+                    className={
+                      filter === "all"
+                        ? selectedFilterClass
+                        : unselectedFilterClass
+                    }
+                  >
+                    All
+                  </button>
+                </li>
+
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => setFilter("active")}
+                    className={
+                      filter === "active"
+                        ? selectedFilterClass
+                        : unselectedFilterClass
+                    }
+                  >
+                    Active
+                  </button>
+                </li>
+
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => setFilter("completed")}
+                    className={
+                      filter === "completed"
+                        ? selectedFilterClass
+                        : unselectedFilterClass
+                    }
+                  >
+                    Completed
+                  </button>
+                </li>
+              </ul>
+
               <button
                 type="button"
-                className="cursor-pointer rounded-[3px] border border-[#b83f45]/20 px-1.75 py-0.75"
+                onClick={() => {
+                  setTodos(todos.filter((todo) => !todo.completed));
+                }}
+                className="cursor-pointer justify-self-end hover:underline"
               >
-                All
+                Clear completed
               </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                className="cursor-pointer rounded-[3px] border border-transparent px-1.75 py-0.75 hover:border-[#b83f45]/10"
-              >
-                Active
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                className="cursor-pointer rounded-[3px] border border-transparent px-1.75 py-0.75 hover:border-[#b83f45]/10"
-              >
-                Completed
-              </button>
-            </li>
-          </ul>
-          <button
-            type="button"
-            onClick={() => {
-              setTodos(todos.filter((todo) => !todo.completed));
-              setItems(todos.filter((todo) => !todo.completed).length);
-            }}
-            className="cursor-pointer justify-self-end hover:underline"
-          >
-            Clear completed
-          </button>
-        </footer>
-        </>
+            </footer>
+          </>
         )}
       </div>
     </section>
